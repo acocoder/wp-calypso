@@ -509,13 +509,15 @@ object RunAllUnitTests : BuildType({
 			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
 			scriptContent = """
 				# Duplicated packages
-				DUPLICATED_PACKAGES=${'$'}(npx yarn-deduplicate --list)
-				if [[ -n "${'$'}DUPLICATED_PACKAGES" ]]; then
+				if ! DUPLICATED_PACKAGES=${'$'}(
+					set +e
+					yarn dedupe --check
+				); then
 					echo "Repository contains duplicated packages: "
 					echo ""
 					echo "${'$'}DUPLICATED_PACKAGES"
 					echo ""
-					echo "To fix them, you need to checkout the branch, run 'npx yarn-deduplicate && yarn',"
+					echo "To fix them, you need to checkout the branch, run 'yarn dedupe',"
 					echo "verify that the new packages work and commit the changes in 'yarn.lock'."
 					exit 1
 				else
